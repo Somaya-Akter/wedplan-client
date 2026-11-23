@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Eye, EyeOff } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 
 export default function SignUpPage() {
@@ -16,6 +17,7 @@ export default function SignUpPage() {
     businessName: "",
   });
 
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -30,7 +32,6 @@ export default function SignUpPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     setError("");
 
     if (formData.password.length < 6) {
@@ -48,7 +49,10 @@ export default function SignUpPage() {
       return;
     }
 
-    if (formData.role === "vendor" && !formData.businessName.trim()) {
+    if (
+      formData.role === "vendor" &&
+      !formData.businessName.trim()
+    ) {
       setError("Business name is required for vendors.");
       return;
     }
@@ -56,23 +60,30 @@ export default function SignUpPage() {
     try {
       setLoading(true);
 
-      const { error: signUpError } = await authClient.signUp.email({
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-        requestedRole: formData.role,
-        businessName:
-          formData.role === "vendor" ? formData.businessName : "",
-      });
+      const { error: signUpError } =
+        await authClient.signUp.email({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          requestedRole: formData.role,
+          businessName:
+            formData.role === "vendor"
+              ? formData.businessName
+              : "",
+        });
 
       if (signUpError) {
-        setError(signUpError.message || "Sign up failed.");
+        setError(
+          signUpError.message || "Sign up failed."
+        );
         return;
       }
 
       router.push("/sign-in");
     } catch (err) {
-      setError(err.message || "Something went wrong.");
+      setError(
+        err.message || "Something went wrong."
+      );
     } finally {
       setLoading(false);
     }
@@ -104,7 +115,10 @@ export default function SignUpPage() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-5"
+        >
           <div>
             <label className="mb-2 block text-sm font-medium text-gray-700">
               Full Name
@@ -142,18 +156,40 @@ export default function SignUpPage() {
               Password
             </label>
 
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              placeholder="Minimum 6 characters"
-              className="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none transition focus:border-[#7a3045]"
-            />
+            <div className="relative">
+              <input
+                type={
+                  showPassword
+                    ? "text"
+                    : "password"
+                }
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                placeholder="Minimum 6 characters"
+                className="w-full rounded-xl border border-gray-200 px-4 py-3 pr-12 outline-none transition focus:border-[#7a3045]"
+              />
+
+              <button
+                type="button"
+                onClick={() =>
+                  setShowPassword(
+                    (prev) => !prev
+                  )
+                }
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#7a3045]"
+              >
+                {showPassword ? (
+                  <EyeOff size={20} />
+                ) : (
+                  <Eye size={20} />
+                )}
+              </button>
+            </div>
 
             <p className="mt-2 text-xs text-gray-400">
-              Must contain uppercase and lowercase letters.
+              Minimum 6 characters with uppercase and lowercase letters.
             </p>
           </div>
 
@@ -166,10 +202,14 @@ export default function SignUpPage() {
               name="role"
               value={formData.role}
               onChange={handleChange}
-              className="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none transition focus:border-[#7a3045]"
+              className="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:border-[#7a3045]"
             >
-              <option value="customer">Customer</option>
-              <option value="vendor">Vendor</option>
+              <option value="customer">
+                Customer
+              </option>
+              <option value="vendor">
+                Vendor
+              </option>
             </select>
           </div>
 
@@ -184,7 +224,8 @@ export default function SignUpPage() {
                 name="businessName"
                 value={formData.businessName}
                 onChange={handleChange}
-                placeholder="Your wedding business name"
+                required
+                placeholder="Your business name"
                 className="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none transition focus:border-[#7a3045]"
               />
             </div>
@@ -193,9 +234,11 @@ export default function SignUpPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-xl bg-[#7a3045] px-4 py-3 font-semibold text-white transition hover:bg-[#64263a] disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-xl bg-[#7a3045] px-4 py-3 font-semibold text-white transition hover:bg-[#64263a] disabled:opacity-60"
           >
-            {loading ? "Creating account..." : "Create Account"}
+            {loading
+              ? "Creating account..."
+              : "Create Account"}
           </button>
         </form>
 

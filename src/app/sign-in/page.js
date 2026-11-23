@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Eye, EyeOff } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 
 export default function SignInPage() {
@@ -13,6 +14,7 @@ export default function SignInPage() {
     password: "",
   });
 
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -32,13 +34,16 @@ export default function SignInPage() {
     setLoading(true);
 
     try {
-      const { data, error: signInError } = await authClient.signIn.email({
-        email: formData.email,
-        password: formData.password,
-      });
+      const { data, error: signInError } =
+        await authClient.signIn.email({
+          email: formData.email,
+          password: formData.password,
+        });
 
       if (signInError) {
-        setError(signInError.message || "Invalid email or password.");
+        setError(
+          signInError.message || "Invalid email or password"
+        );
         return;
       }
 
@@ -121,15 +126,36 @@ export default function SignInPage() {
               Password
             </label>
 
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              placeholder="Enter your password"
-              className="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none transition focus:border-[#7a3045]"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                placeholder="Enter your password"
+                className="w-full rounded-xl border border-gray-200 px-4 py-3 pr-12 outline-none transition focus:border-[#7a3045]"
+              />
+
+              <button
+                type="button"
+                onClick={() =>
+                  setShowPassword((prev) => !prev)
+                }
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 transition hover:text-[#7a3045]"
+                aria-label={
+                  showPassword
+                    ? "Hide password"
+                    : "Show password"
+                }
+              >
+                {showPassword ? (
+                  <EyeOff size={20} />
+                ) : (
+                  <Eye size={20} />
+                )}
+              </button>
+            </div>
           </div>
 
           <button
@@ -143,7 +169,9 @@ export default function SignInPage() {
 
         <div className="my-6 flex items-center gap-3">
           <div className="h-px flex-1 bg-gray-200" />
-          <span className="text-xs text-gray-400">OR</span>
+          <span className="text-xs text-gray-400">
+            OR
+          </span>
           <div className="h-px flex-1 bg-gray-200" />
         </div>
 
